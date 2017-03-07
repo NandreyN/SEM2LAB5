@@ -4,12 +4,15 @@
 using namespace std;
 #define TIMER1 1
 #define MYKEY 1
+#define WIDTHFACTOR 0.8
+#define HEIGHTFACTOR 1.5
 
 BOOL InitApplication(HINSTANCE hinstance);
 BOOL InitInstance(HINSTANCE hinstance, int nCMdShow);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT messagem, WPARAM wparam, LPARAM lparam);
 void DrawCircle(HDC& hdc, RECT& rect);
 void DisplayTime(HDC& hdc, RECT& rect, int seconds);
+string GetOutTime(int seconds);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -52,7 +55,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		EndPaint(hwnd, &ps);
 		break;
 	case WM_HOTKEY:
-		switch(wparam)
+		switch (wparam)
 		{
 		case MYKEY:
 			seconds = -1;
@@ -78,7 +81,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		{
 			if (!ifTicks) break;
 			seconds++;
-			InvalidateRect(hwnd, NULL, true);
+			string dsp = GetOutTime(seconds);
+			int wdth = (WIDTHFACTOR*x) / dsp.size();
+			int hght = wdth  * HEIGHTFACTOR;
+			RECT rect;
+			rect.left = 0; rect.top = y / 2 - hght;
+			rect.right = x; rect.bottom = y / 2 + hght;
+
+			InvalidateRect(hwnd, &rect, true);
 			break;
 		}
 		default: break;
@@ -161,14 +171,10 @@ void DrawCircle(HDC& hdc, RECT& rect)
 
 void DisplayTime(HDC& hdc, RECT& rect, int seconds)
 {
-	int minutes = seconds / 60;
-	seconds %= 60;
-	string displayText;
-	displayText += to_string(minutes) + ":" + to_string(seconds);
-
+	string displayText = GetOutTime(seconds);
 	LOGFONT lf;
-	lf.lfWidth = (0.8*rect.right) / displayText.size();
-	lf.lfHeight = lf.lfWidth * 1.5;
+	lf.lfWidth = (WIDTHFACTOR*rect.right) / displayText.size();
+	lf.lfHeight = lf.lfWidth * HEIGHTFACTOR;
 	lf.lfCharSet = DEFAULT_CHARSET;
 	lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
 	lf.lfEscapement = 0;
@@ -183,8 +189,23 @@ void DisplayTime(HDC& hdc, RECT& rect, int seconds)
 	HFONT newFont = CreateFontIndirect(&lf);
 	HFONT oldFont = (HFONT)SelectObject(hdc, newFont);
 
-	DrawText(hdc, displayText.data(), displayText.size(), &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	RECT rectToDraw;
+	rectToDraw.left = 0;
+	rectToDraw.top = (rect.bottom / 2) - lf.lfHeight;
+	rectToDraw.right = rect.right;
+	rectToDraw.bottom = (rect.bottom / 2) + lf.lfHeight;
+
+	DrawText(hdc, displayText.data(), displayText.size(), &rectToDraw, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
 	SelectObject(hdc, oldFont);
 	DeleteObject(newFont);
+}
+
+string GetOutTime(int seconds)
+{
+	int minutes = seconds / 60;
+	seconds %= 60;
+	string displayText;
+	displayText += to_string(minutes) + ":" + to_string(seconds);
+	return displayText;
 }
