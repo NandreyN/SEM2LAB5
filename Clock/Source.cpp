@@ -156,7 +156,7 @@ BOOL InitInstance(HINSTANCE hinstance, int nCMdShow)
 
 	ShowWindow(hwnd, nCMdShow);
 	UpdateWindow(hwnd);
-	RegisterHotKey(hwnd, MYKEY, MOD_SHIFT, 'S');
+	RegisterHotKey(hwnd, MYKEY, MOD_CONTROL, 'S');
 	return TRUE;
 }
 void DrawCircle(HDC& hdc, RECT& rect)
