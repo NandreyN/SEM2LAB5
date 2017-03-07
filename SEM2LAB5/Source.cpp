@@ -1,12 +1,4 @@
 ﻿#include <windows.h>
-#include <ctime>
-#include <vector>
-#include <algorithm>
-#include <fstream>
-#include <iterator>
-#include <iostream>
-#include <string>
-#include <sstream>
 
 using namespace std;
 
@@ -52,11 +44,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		{
 		case '-':
 			ModifyFont(logfont, '-');
-			textToDisplay[strlen(textToDisplay)-1] = '-';
+			textToDisplay[strlen(textToDisplay)-1] = '-'; // textToDisplay[strlen(textToDisplay)] = '-';
 			break;
 		case	'+':
 			ModifyFont(logfont, '+');
-			textToDisplay[strlen(textToDisplay)-1] = '+';
+			textToDisplay[strlen(textToDisplay)-1] = '+'; // textToDisplay[strlen(textToDisplay)] = '+';
 			break;
 		default:
 			break;
