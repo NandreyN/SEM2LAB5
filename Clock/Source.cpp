@@ -175,18 +175,25 @@ void DisplayTime(HDC& hdc, RECT& rect, int seconds)
 	LOGFONT lf;
 	lf.lfWidth = (WIDTHFACTOR*rect.right) / displayText.size();
 	lf.lfHeight = lf.lfWidth * HEIGHTFACTOR;
-	lf.lfCharSet = DEFAULT_CHARSET;
-	lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-	lf.lfEscapement = 0;
-	lf.lfItalic = 0;
-	lf.lfOrientation = 0;
-	lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
-	lf.lfPitchAndFamily = DEFAULT_PITCH;
-	lf.lfQuality = DEFAULT_QUALITY;
-	lf.lfStrikeOut = 0;
-	lf.lfUnderline = 0;
+	
+	HFONT newFont = CreateFont(
+		(WIDTHFACTOR*rect.right) / displayText.size() * HEIGHTFACTOR,
+		(WIDTHFACTOR*rect.right) / displayText.size(),
+		0,
+		0,
+		FW_THIN,
+		0,
+		0,
+		0,
+		DEFAULT_CHARSET,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY,
+		DEFAULT_PITCH,
+		"Times"
+	);
 
-	HFONT newFont = CreateFontIndirect(&lf);
+	//HFONT newFont = CreateFontIndirect(&lf);
 	HFONT oldFont = (HFONT)SelectObject(hdc, newFont);
 
 	RECT rectToDraw;
