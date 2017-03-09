@@ -114,7 +114,7 @@ BOOL InitApplication(HINSTANCE hinstance)
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wc.lpfnWndProc = WndProc;
 	wc.lpszClassName = (LPSTR)"Circles";
-	wc.style = CS_HREDRAW | CS_VREDRAW;
+	wc.style = CS_HREDRAW | CS_VREDRAW ;
 	wc.lpszMenuName = NULL;
 
 	if (!RegisterClassEx(&wc))
@@ -129,7 +129,7 @@ BOOL InitInstance(HINSTANCE hinstance, int nCMdShow)
 	HWND hwnd; hwnd = CreateWindow(
 		"Circles",
 		"Circles",
-		WS_OVERLAPPEDWINDOW,
+		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
 		0,
 		0,
 		600,
