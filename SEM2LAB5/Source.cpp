@@ -33,22 +33,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 	switch (message)
 	{
+	case WM_CREATE:
+		logfont.lfHeight = 500 / strlen(textToDisplay);
+		logfont.lfWidth = 0.75*logfont.lfHeight;
+		break;
 	case WM_SIZE:
 		x = LOWORD(lparam);
 		y = HIWORD(lparam);
-		logfont.lfHeight = x / strlen(textToDisplay);
-		logfont.lfWidth = 0.75*logfont.lfHeight;
 		break;
 	case WM_CHAR:
 		switch (wparam)
 		{
 		case '-':
 			ModifyFont(logfont, '-');
-			textToDisplay[strlen(textToDisplay)-1] = '-'; // textToDisplay[strlen(textToDisplay)] = '-';
+			textToDisplay[strlen(textToDisplay) - 1] = '-'; // textToDisplay[strlen(textToDisplay)] = '-';
 			break;
 		case	'+':
 			ModifyFont(logfont, '+');
-			textToDisplay[strlen(textToDisplay)-1] = '+'; // textToDisplay[strlen(textToDisplay)] = '+';
+			textToDisplay[strlen(textToDisplay) - 1] = '+'; // textToDisplay[strlen(textToDisplay)] = '+';
 			break;
 		default:
 			break;

@@ -57,31 +57,37 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	static int x, y;
 	static HDC hdc;
 	static vector<Circle> circleCollection;
-	Circle c;
+	Circle circle;
+	PAINTSTRUCT ps;
 
 	switch (message)
 	{
 	case WM_CREATE:
-		hdc = GetDC(hwnd);
+		//hdc = GetDC(hwnd);
 		LoadFromFile(circleCollection);
 		break;
 	case WM_PAINT:
-		for_each(circleCollection.begin(), circleCollection.end(), [](Circle circle) { DrawCircle(hdc, circle.center.x, circle.center.y, circle.R); });
+		hdc = BeginPaint(hwnd, &ps);
+		for_each(circleCollection.begin(), circleCollection.end(), [](Circle crcl) { DrawCircle(hdc, crcl.center.x, crcl.center.y, crcl.R); });
+		EndPaint(hwnd, &ps);
 		break;
 	case WM_LBUTTONUP:
 		int xC; xC = LOWORD(lparam);
 		int yC;  yC = HIWORD(lparam);
 
-		c = GetCircle(circleCollection, xC, yC);
-		if (c.R == -1)
+		circle = GetCircle(circleCollection, xC, yC);
+
+		if (circle.R == -1)
 		{
-			circleCollection.push_back(DrawCircle(hdc, xC, yC, 5));
+			circle.R = 5;
+			circleCollection.push_back(circle);
 		}
 		else
 		{
-			circleCollection.push_back(DrawCircle(hdc, c.center.x, c.center.y, c.R + 5));
+			circle.R += 5;
+			circleCollection.push_back(circle);
 		}
-
+		InvalidateRect(hwnd, NULL, true);
 		break;
 	case WM_SIZE:
 		x = LOWORD(lparam);
@@ -90,7 +96,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	case  WM_CLOSE:
 		SaveToFile(circleCollection);
 		DestroyWindow(hwnd);
-		ReleaseDC(hwnd, hdc);
+		//ReleaseDC(hwnd, hdc);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -114,7 +120,7 @@ BOOL InitApplication(HINSTANCE hinstance)
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wc.lpfnWndProc = WndProc;
 	wc.lpszClassName = (LPSTR)"Circles";
-	wc.style = CS_HREDRAW | CS_VREDRAW ;
+	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpszMenuName = NULL;
 
 	if (!RegisterClassEx(&wc))
@@ -160,22 +166,24 @@ Circle DrawCircle(HDC& hdc, int x0, int y0, int R)
 
 bool IsInCircle(int x, int y, Circle& circle)
 {
-	int dist = sqrt(pow((circle.center.x - x), 2) + pow((circle.center.y - y), 2));
-	return (dist <= circle.R) ? true : false;
+	double dist = pow((circle.center.x - x), 2) + pow((circle.center.y - y), 2); //double
+	return (dist <= pow(circle.R,2)) ? true : false; // r*r
 }
 
 Circle GetCircle(vector<Circle>& circles, int x, int y)
 {
-	vector<Circle>::iterator iter = find_if(circles.begin(), circles.end(), [x, y](Circle c)
+	vector<Circle>::reverse_iterator iter = find_if(circles.rbegin(), circles.rend(), [x, y](Circle c)
 	{
 		return IsInCircle(x, y, c);
 	});
-	Circle c;
-	if (iter != circles.end())
+
+	Circle c; c.center.x = x; c.center.y = y;
+	if (iter != circles.rend())
 	{
 		c = *iter;
-		circles.erase(iter);
+		circles.erase((iter + 1).base());
 	}
+
 	return c;
 }
 
@@ -190,6 +198,6 @@ void SaveToFile(vector<Circle>& circles)
 void LoadFromFile(vector<Circle>& circles)
 {
 	ifstream out("data.txt");
-	copy(istream_iterator<Circle>(out), istream_iterator<Circle>(),back_inserter(circles));
+	copy(istream_iterator<Circle>(out), istream_iterator<Circle>(), back_inserter(circles));
 	out.close();
 }

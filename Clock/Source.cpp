@@ -30,7 +30,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPSTR lpCmdLine,
 }
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
-	static bool ifTicks;
+	static bool ifTicks, isTimerActive;
 	static int x, y;
 	static HDC hdc;
 	PAINTSTRUCT ps;
@@ -68,9 +68,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		switch (wparam)
 		{
 		case '-':
+			if (isTimerActive)
+			{
+				KillTimer(hwnd, TIMER1);
+				isTimerActive = false;
+			}
 			ifTicks = false;
 			break;
 		case '+':
+			if (!isTimerActive)
+			{
+				SetTimer(hwnd, TIMER1, 1000, (TIMERPROC)NULL);
+				isTimerActive = true;
+			}
 			ifTicks = true;
 			break;
 		}
@@ -81,7 +91,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		{
 		case TIMER1:
 		{
-			if (!ifTicks) break;
+			if (!ifTicks) break; // kill timer
 			seconds++;
 			string dsp = GetOutTime(seconds);
 			
@@ -175,7 +185,7 @@ void DisplayTime(HDC& hdc, RECT& rect, int seconds)
 		(WIDTHFACTOR*rect.right) / displayText.size(),
 		0,
 		0,
-		FW_THIN,
+		FW_HEAVY,
 		0,
 		0,
 		0,
@@ -184,7 +194,7 @@ void DisplayTime(HDC& hdc, RECT& rect, int seconds)
 		CLIP_DEFAULT_PRECIS,
 		DEFAULT_QUALITY,
 		DEFAULT_PITCH,
-		"Times"
+		"Times New Roman"
 	);
 
 	//HFONT newFont = CreateFontIndirect(&lf);
