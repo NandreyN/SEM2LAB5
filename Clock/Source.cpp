@@ -36,7 +36,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	PAINTSTRUCT ps;
 	static RECT clientRect;
 	static int seconds;
-
+	static RECT textArea;
 	switch (message)
 	{
 	case WM_CREATE:
@@ -51,7 +51,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		hdc = BeginPaint(hwnd, &ps);
 		GetClientRect(hwnd, &clientRect);
 		DrawCircle(hdc, clientRect);
-		DisplayTime(hdc, clientRect, seconds);
+		SetRect(&textArea, 0.03*x, y / 2 - y*0.2, x - 0.03*x, y / 2 + y*0.2);
+		
+		DisplayTime(hdc, textArea, seconds);
 		EndPaint(hwnd, &ps);
 		break;
 	case WM_HOTKEY:
@@ -82,13 +84,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 			if (!ifTicks) break;
 			seconds++;
 			string dsp = GetOutTime(seconds);
-			int wdth = (WIDTHFACTOR*x) / dsp.size();
-			int hght = wdth  * HEIGHTFACTOR;
-			RECT rect;
-			rect.left = 0; rect.top = y / 2 - hght;
-			rect.right = x; rect.bottom = y / 2 + hght;
-
-			InvalidateRect(hwnd, &rect, true);
+			
+			InvalidateRect(hwnd, &textArea, true);
 			break;
 		}
 		default: break;
@@ -140,8 +137,8 @@ BOOL InitInstance(HINSTANCE hinstance, int nCMdShow)
 		WS_OVERLAPPEDWINDOW,
 		0,
 		0,
-		600,
-		600,
+		400,
+		400,
 		NULL,
 		NULL,
 		hinstance,
@@ -172,9 +169,6 @@ void DrawCircle(HDC& hdc, RECT& rect)
 void DisplayTime(HDC& hdc, RECT& rect, int seconds)
 {
 	string displayText = GetOutTime(seconds);
-	LOGFONT lf;
-	lf.lfWidth = (WIDTHFACTOR*rect.right) / displayText.size();
-	lf.lfHeight = lf.lfWidth * HEIGHTFACTOR;
 	
 	HFONT newFont = CreateFont(
 		(WIDTHFACTOR*rect.right) / displayText.size() * HEIGHTFACTOR,
@@ -196,13 +190,7 @@ void DisplayTime(HDC& hdc, RECT& rect, int seconds)
 	//HFONT newFont = CreateFontIndirect(&lf);
 	HFONT oldFont = (HFONT)SelectObject(hdc, newFont);
 
-	RECT rectToDraw;
-	rectToDraw.left = 0;
-	rectToDraw.top = (rect.bottom / 2) - lf.lfHeight;
-	rectToDraw.right = rect.right;
-	rectToDraw.bottom = (rect.bottom / 2) + lf.lfHeight;
-
-	DrawText(hdc, displayText.data(), displayText.size(), &rectToDraw, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	DrawText(hdc, displayText.data(), displayText.size(), &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
 	SelectObject(hdc, oldFont);
 	DeleteObject(newFont);
