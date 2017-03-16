@@ -68,7 +68,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hwnd, &ps);
+		
 		for_each(circleCollection.begin(), circleCollection.end(), [](Circle crcl) { DrawCircle(hdc, crcl.center.x, crcl.center.y, crcl.R); });
+
 		EndPaint(hwnd, &ps);
 		break;
 	case WM_LBUTTONUP:
@@ -76,8 +78,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		int yC;  yC = HIWORD(lparam);
 
 		circle = GetCircle(circleCollection, xC, yC);
+		int cR; cR = circle.R;
 
-		if (circle.R == -1)
+		if (cR == -1)
 		{
 			circle.R = 5;
 			circleCollection.push_back(circle);
@@ -85,9 +88,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		else
 		{
 			circle.R += 5;
-			circleCollection.push_back(circle);
+			circleCollection.push_back(circle); // Region
 		}
-		InvalidateRect(hwnd, NULL, true);
+		//HRGN toRedraw; toRedraw = CreateEllipticRgn(circle.center.x - cR, circle.center.y - cR, circle.center.x + cR, circle.center.y + cR);
+		hdc = GetDC(hwnd);
+		DrawCircle(hdc, circle.center.x, circle.center.y, circle.R);
+		ReleaseDC(hwnd, hdc);
+		ValidateRect(hwnd, NULL);
+		//InvalidateRgn(hwnd, toRedraw, true);
+
+		//DeleteObject(toRedraw);
+		//InvalidateRect(hwnd, NULL, true);
 		break;
 	case WM_SIZE:
 		x = LOWORD(lparam);

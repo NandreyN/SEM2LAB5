@@ -135,6 +135,7 @@ BOOL InitApplication(HINSTANCE hinstance)
 		MessageBox(NULL, "Unable to init app", "Error", MB_OK);
 		return FALSE;
 	}
+	
 	return TRUE;
 }
 BOOL InitInstance(HINSTANCE hinstance, int nCMdShow)
