@@ -68,9 +68,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hwnd, &ps);
-		
-		for_each(circleCollection.begin(), circleCollection.end(), [](Circle crcl) { DrawCircle(hdc, crcl.center.x, crcl.center.y, crcl.R); });
 
+		for_each(circleCollection.begin(), circleCollection.end(), [](Circle crcl) { DrawCircle(hdc, crcl.center.x, crcl.center.y, crcl.R); });
+		//TextOut(hdc, 0, 0, "!!!!!!!!!!!", 10);
 		EndPaint(hwnd, &ps);
 		break;
 	case WM_LBUTTONUP:
@@ -83,22 +83,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		if (cR == -1)
 		{
 			circle.R = 5;
+			cR = 5;
 			circleCollection.push_back(circle);
 		}
 		else
 		{
 			circle.R += 5;
+			cR += 5;
 			circleCollection.push_back(circle); // Region
 		}
-		//HRGN toRedraw; toRedraw = CreateEllipticRgn(circle.center.x - cR, circle.center.y - cR, circle.center.x + cR, circle.center.y + cR);
-		hdc = GetDC(hwnd);
-		DrawCircle(hdc, circle.center.x, circle.center.y, circle.R);
-		ReleaseDC(hwnd, hdc);
-		ValidateRect(hwnd, NULL);
-		//InvalidateRgn(hwnd, toRedraw, true);
+		RECT r; SetRect(&r, circle.center.x - 1.5*cR, circle.center.y - 1.5*cR, circle.center.x + 1.5*cR, circle.center.y + 1.5*cR);
+		
+		InvalidateRect(hwnd, &r, true);
 
-		//DeleteObject(toRedraw);
-		//InvalidateRect(hwnd, NULL, true);
 		break;
 	case WM_SIZE:
 		x = LOWORD(lparam);
@@ -178,7 +175,7 @@ Circle DrawCircle(HDC& hdc, int x0, int y0, int R)
 bool IsInCircle(int x, int y, Circle& circle)
 {
 	double dist = pow((circle.center.x - x), 2) + pow((circle.center.y - y), 2); //double
-	return (dist <= pow(circle.R,2)) ? true : false; // r*r
+	return (dist <= pow(circle.R, 2)) ? true : false; // r*r
 }
 
 Circle GetCircle(vector<Circle>& circles, int x, int y)
